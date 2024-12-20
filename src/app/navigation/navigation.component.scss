@@ -3,7 +3,24 @@
 }
 
 .sidenav {
-  width: 200px;
+  //width: 200px;
+}
+
+/*
+.sidenav-content {
+  width: calc(100vw - 200px);
+}
+*/
+
+.sidenav-menu {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.sidenav-footer {
+  margin-top: auto;
+  padding: 16px;
 }
 
 .sidenav .mat-toolbar {
@@ -14,4 +31,8 @@
   position: sticky;
   top: 0;
   z-index: 1;
+}
+
+a {
+  color: var(--mat-primary);
 }

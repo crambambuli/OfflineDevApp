@@ -3,11 +3,11 @@ PWA to export/import cached app data for offline development
 
 Capabilities/Use Case:
 
-Collect application data while in VPN
-Export application and other cached data (GIS) to file
-Run local http-server outside VPN
-Import application data etc. from file
-Run/develop application in offline-mode
+- Collect application data while in VPN
+- Export application and other cached data (GIS) to file
+- Run local http-server outside VPN
+- Import application data etc. from file
+- Run/develop application in offline-mode
 
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.0.3.
 

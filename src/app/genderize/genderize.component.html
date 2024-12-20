@@ -1,0 +1,36 @@
+<mat-card>
+  <mat-card-header>
+    <mat-card-title><a href="https://genderize.io/">Genderize.io</a></mat-card-title>
+    <mat-card-subtitle>
+      Predict the gender of a person based on their name.
+    </mat-card-subtitle>
+  </mat-card-header>
+
+  <mat-card-content>
+    <p>https://api.genderize.io?name={{ vorname }}</p>
+
+    <div>
+      <mat-form-field>
+        <mat-label>Vorname</mat-label>
+        <input matInput [(ngModel)]="vorname">
+      </mat-form-field>
+
+      <button
+        mat-icon-button
+        [disabled]="!vorname"
+        (click)="fetchGender(vorname)"
+      >
+        <mat-icon>search</mat-icon>
+      </button>
+    </div>
+
+    <div>
+      Geschlecht: {{ (result$ | async)?.gender }}
+    </div>
+    <div>
+      Wahrscheinlichkeit: {{ (result$ | async)?.probability }}
+    </div>
+    <span></span>
+
+  </mat-card-content>
+</mat-card>

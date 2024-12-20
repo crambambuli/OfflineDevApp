@@ -1,0 +1,53 @@
+<mat-card appearance="outlined">
+  <mat-card-header>
+    <mat-card-title-group>
+      <mat-card-title>PWA zur Offline-Entwicklung</mat-card-title>
+      <mat-card-subtitle>Demo-Anwendung</mat-card-subtitle>
+      <img
+        mat-card-sm-image
+        src="icons/globe-64x64.png"
+        alt="Offline Development App Demo"
+      >
+    </mat-card-title-group>
+  </mat-card-header>
+
+  <mat-card-content>
+    <p>Web-Anwendung (PWA) zur Offline-Entwicklung außerhalb eines VPN</p>
+
+    <p>Im VPN laufende Anwendung mit HTTP-Zugriff auf Anwendungsdaten:</p>
+    <ul>
+      <li>
+        Beim Navigieren durch die Anwendung werden die per Fetch/Get-Request geladenen Anwendungsdaten eingesammelt.
+      </li>
+      <li>Die Daten werden statt im Cache in der IndexedDB abgelegt (gecacht).</li>
+      <li>
+        Daten werden nur vom Server geladen, wenn es für sie nicht bereits einen Eintrag in der IndexedDB gibt
+        => "IndexedDB first" als Caching-Strategie.
+      </li>
+      <li>Datei-Export für den Inhalt der IndexedDB.</li>
+    </ul>
+    <p>Außerhalb des VPN laufende Anwendung ohne HTTP-Zugriff auf Anwendungsdaten:</p>
+    <ul>
+      <li>Die Anwendung wird offline mittels http-server -c-1 gestartet.</li>
+      <li>Datei-Import aus Datei. Mit dem geladenen Inhalt wird die IndexedDB befüllt.</li>
+      <li>
+        Alle Get-Requests, für die sich ein matchender Eintrag in der IndexedDB findet, können offline erfüllt werden.
+      </li>
+      <li>
+        Findet sich kein matchender Eintrag, schlägt der nachfolgende HTTP-Request fehl und es wird ein Fehler
+        ausgegeben ("Anwendung offline").
+      </li>
+      <li>
+        Sofern VPN-seitig alle relevanten Anwendungsdaten eingesammelt worden sind, kann die App offline betrieben und
+        weiterentwickelt werden.
+      </li>
+    </ul>
+
+    <p>Eingesetzte Technologien:</p>
+    <ul>
+      <li>Angular 19 + Angular Material 3</li>
+      <li>Workbox 7 (macht aus der Web-App eine PWA mit einem Service Worker)</li>
+      <li>IndexedDB</li>
+    </ul>
+  </mat-card-content>
+</mat-card>
