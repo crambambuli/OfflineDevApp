@@ -29,18 +29,24 @@ import { MatIconButton } from '@angular/material/button';
   styleUrl: './genderize.component.scss'
 })
 export class GenderizeComponent {
-  vorname: string;
+  name: string;
   result$: Observable<GenderizeResult>;
 
   constructor(private http: HttpClient) {
   }
 
-  fetchGender(vorname: string) {
-    this.result$ = this.http.get<GenderizeResult>(`https://api.genderize.io?name=${ vorname }`);
+  onKeyPressed(event: KeyboardEvent) {
+    if (event.code !== 'Enter' && this.result$) {
+      this.result$ = undefined;
+    }
+  }
+
+  fetchGender(name: string) {
+    this.result$ = this.http.get<GenderizeResult>(`https://api.genderize.io?name=${name}`);
   }
 }
 
-export interface GenderizeResult {
+interface GenderizeResult {
   count: number;
   name: string;
   gender: string;

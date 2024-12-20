@@ -24,5 +24,4 @@ import {
   styleUrl: './home.component.scss'
 })
 export class HomeComponent {
-
 }

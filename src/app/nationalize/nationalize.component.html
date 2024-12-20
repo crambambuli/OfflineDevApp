@@ -1,1 +1,26 @@
-<p>nationalize works!</p>
+<mat-card>
+  <mat-card-header>
+    <mat-card-title><a href="https://nationalize.io/">Nationalize.io</a></mat-card-title>
+    <mat-card-subtitle>
+      Estimate the nationality of a person based on a last name.
+    </mat-card-subtitle>
+  </mat-card-header>
+
+  <mat-card-content>
+    <p>https://api.nationalize.io?name={{ name }}</p>
+
+    <mat-form-field>
+      <mat-label>Nachname</mat-label>
+      <input matInput [(ngModel)]="name" (keydown)="onKeyPressed($event)" (keydown.enter)="fetchNationality(name)">
+    </mat-form-field>
+    <button mat-icon-button [disabled]="!name" (click)="fetchNationality(name)">
+      <mat-icon>search</mat-icon>
+    </button>
+
+    @if (result$ | async; as result) {
+      @for (country of result.country; track $index) {
+        <div>Länder-ID: {{ country.country_id }}, Wahrscheinlichkeit: {{ country.probability }}</div>
+      }
+    }
+  </mat-card-content>
+</mat-card>

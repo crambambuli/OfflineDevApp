@@ -1,1 +1,24 @@
-<p>agify works!</p>
+<mat-card>
+  <mat-card-header>
+    <mat-card-title><a href="https://agify.io/">Agify.io</a></mat-card-title>
+    <mat-card-subtitle>
+      Estimate the age of a person based on a first name.
+    </mat-card-subtitle>
+  </mat-card-header>
+
+  <mat-card-content>
+    <p>https://api.agify.io?name={{ name }}</p>
+
+    <mat-form-field>
+      <mat-label>Vorname</mat-label>
+      <input matInput [(ngModel)]="name" (keydown)="onKeyPressed($event)" (keydown.enter)="fetchAge(name)">
+    </mat-form-field>
+    <button mat-icon-button [disabled]="!name" (click)="fetchAge(name)">
+      <mat-icon>search</mat-icon>
+    </button>
+
+    @if (result$ | async; as result) {
+      <div>Alter: {{ result.age }}</div>
+    }
+  </mat-card-content>
+</mat-card>

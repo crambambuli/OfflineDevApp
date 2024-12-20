@@ -7,30 +7,18 @@
   </mat-card-header>
 
   <mat-card-content>
-    <p>https://api.genderize.io?name={{ vorname }}</p>
+    <p>https://api.genderize.io?name={{ name }}</p>
 
-    <div>
-      <mat-form-field>
-        <mat-label>Vorname</mat-label>
-        <input matInput [(ngModel)]="vorname">
-      </mat-form-field>
+    <mat-form-field>
+      <mat-label>Vorname</mat-label>
+      <input matInput [(ngModel)]="name" (keydown)="onKeyPressed($event)" (keydown.enter)="fetchGender(name)">
+    </mat-form-field>
+    <button mat-icon-button [disabled]="!name" (click)="fetchGender(name)">
+      <mat-icon>search</mat-icon>
+    </button>
 
-      <button
-        mat-icon-button
-        [disabled]="!vorname"
-        (click)="fetchGender(vorname)"
-      >
-        <mat-icon>search</mat-icon>
-      </button>
-    </div>
-
-    <div>
-      Geschlecht: {{ (result$ | async)?.gender }}
-    </div>
-    <div>
-      Wahrscheinlichkeit: {{ (result$ | async)?.probability }}
-    </div>
-    <span></span>
-
+    @if (result$ | async; as result) {
+      <div>Geschlecht: {{ result.gender }}, Wahrscheinlichkeit: {{ result.probability }}</div>
+    }
   </mat-card-content>
 </mat-card>
