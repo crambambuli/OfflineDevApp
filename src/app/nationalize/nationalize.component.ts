@@ -32,8 +32,7 @@ export class NationalizeComponent {
   name: string;
   result$: Observable<NationalizeResult>;
 
-  constructor(private http: HttpClient) {
-  }
+  constructor(private http: HttpClient) {}
 
   onKeyPressed(event: KeyboardEvent) {
     if (event.code !== 'Enter' && this.result$) {

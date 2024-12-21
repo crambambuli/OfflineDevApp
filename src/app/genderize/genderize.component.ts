@@ -32,8 +32,7 @@ export class GenderizeComponent {
   name: string;
   result$: Observable<GenderizeResult>;
 
-  constructor(private http: HttpClient) {
-  }
+  constructor(private http: HttpClient) {}
 
   onKeyPressed(event: KeyboardEvent) {
     if (event.code !== 'Enter' && this.result$) {
