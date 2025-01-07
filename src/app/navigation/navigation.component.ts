@@ -11,7 +11,7 @@ import { map, shareReplay } from 'rxjs/operators';
 import { routes } from '../app.routes';
 import { Route, RouterLink, RouterLinkActive } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Workbox, messageSW } from 'workbox-window';
+import { Workbox } from 'workbox-window';
 
 @Component({
   selector: 'app-navigation',

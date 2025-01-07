@@ -1,15 +1,7 @@
-import {precacheAndRoute, createHandlerBoundToURL} from 'workbox-precaching';
-import {NavigationRoute, registerRoute} from 'workbox-routing';
-import {setCacheNameDetails, clientsClaim} from 'workbox-core';
-import {
-  CacheFirst,
-  NetworkFirst,
-  StaleWhileRevalidate,
-} from 'workbox-strategies';
-import {ExpirationPlugin} from 'workbox-expiration';
-import {CacheableResponsePlugin} from 'workbox-cacheable-response';
+import {createHandlerBoundToURL, precacheAndRoute} from 'workbox-precaching';
 import {googleFontsCache, imageCache} from 'workbox-recipes';
-import {BackgroundSyncPlugin} from 'workbox-background-sync';
+import {NavigationRoute, registerRoute} from "workbox-routing";
+import {clientsClaim, setCacheNameDetails} from "workbox-core";
 
 // SETTINGS
 

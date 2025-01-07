@@ -8,6 +8,8 @@ import {
   MatCardTitle,
   MatCardTitleGroup
 } from '@angular/material/card';
+import { MatButton } from '@angular/material/button';
+import { ExportImportService } from '../services/export-import.service';
 
 @Component({
   selector: 'app-home',
@@ -18,9 +20,12 @@ import {
     MatCardTitleGroup,
     MatCardTitle,
     MatCardSubtitle,
-    MatCardSmImage
+    MatCardSmImage,
+    MatButton
   ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss'
 })
-export class HomeComponent {}
+export class HomeComponent {
+  constructor(public exportImportService: ExportImportService) {}
+}

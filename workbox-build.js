@@ -10,7 +10,7 @@ let workboxConfig = {
   ],
   globIgnores: [
     // Skip ES5 bundles for Angular
-    '**/*-es5.*.js',
+    '**/*-es5.*.js'
   ],
 
   swSrc: 'src/service-worker.js',
@@ -20,7 +20,7 @@ let workboxConfig = {
   dontCacheBustURLsMatching: new RegExp('.+.[a-f0-9]{20}.(?:js|css)'),
 
   // By default, Workbox will not cache files larger than 2Mb (might be an issue for dev builds)
-  maximumFileSizeToCacheInBytes: 4 * 1024 * 1024, // 4Mb
+  maximumFileSizeToCacheInBytes: 4 * 1024 * 1024 // 4Mb
 };
 
 injectManifest(workboxConfig).then(({count, size}) => {
