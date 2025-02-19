@@ -1,8 +1,10 @@
-import {createHandlerBoundToURL, precacheAndRoute} from 'workbox-precaching';
-import {googleFontsCache, imageCache} from 'workbox-recipes';
-import {NavigationRoute, registerRoute} from "workbox-routing";
-import {clientsClaim, setCacheNameDetails} from "workbox-core";
-import {CacheFirst, NetworkFirst, Strategy} from "workbox-strategies";
+import { createHandlerBoundToURL, precacheAndRoute } from 'workbox-precaching';
+import { googleFontsCache, imageCache } from 'workbox-recipes';
+import { NavigationRoute, registerRoute } from "workbox-routing";
+import { clientsClaim, setCacheNameDetails } from "workbox-core";
+import { CacheFirst, NetworkFirst, Strategy, StrategyHandler } from "workbox-strategies";
+
+declare const self: ServiceWorkerGlobalScope;
 
 // SETTINGS
 
@@ -13,7 +15,7 @@ clientsClaim();
 //self.skipWaiting();
 
 // Setting custom cache names
-setCacheNameDetails({precache: 'wb7-precache', runtime: 'wb7-runtime'});
+setCacheNameDetails({ precache: 'wb7-precache', runtime: 'wb7-runtime' });
 
 // PRECACHING
 
@@ -30,12 +32,12 @@ registerRoute(navigationRoute);
 // STATIC RESOURCES
 
 // https://developer.chrome.com/docs/workbox/modules/workbox-recipes#google_fonts_cache
-googleFontsCache({cachePrefix: 'wb7-gfonts'});
+googleFontsCache({ cachePrefix: 'wb7-gfonts' });
 
 // CONTENT
 
 // https://developer.chrome.com/docs/workbox/modules/workbox-recipes#image_cache
-imageCache({cacheName: 'wb7-content-images', maxEntries: 10});
+imageCache({ cacheName: 'wb7-content-images', maxEntries: 10 });
 
 // RUNTIME CACHING
 
@@ -49,11 +51,12 @@ registerRoute(matchCallback, new NetworkFirst());
 
 
 class IDBStrategy extends Strategy {
-  _handle(request, handler) {
+  _handle(request: Request, handler: StrategyHandler): Promise<Response | undefined> {
 
     console.log('###IDBStrategy._handle: request=', request);
 
     return new Promise(async (resolve, reject) => {
+      // Request in Cache?
       const cacheMatchResponse = await handler.cacheMatch(request);
       console.log('###cacheMatchResponse=', cacheMatchResponse);
 
@@ -61,6 +64,8 @@ class IDBStrategy extends Strategy {
       // ...
 
       if (cacheMatchResponse) {
+        // Eintrag für Request gefunden in Cache => Gib Response (Clone!) oder neue Response zurück.
+
         // const newResponse = cacheMatchResponse.clone();
 
         const responseBody = await cacheMatchResponse.text();
@@ -78,6 +83,7 @@ class IDBStrategy extends Strategy {
 
         resolve(newResponse);
       } else {
+        // Kein Eintrag in Cache => Sende Request und schreibe Response in Cache.
 
         /*
         const fetchAndCachePutResponse = await handler.fetchAndCachePut(request);
@@ -90,10 +96,12 @@ class IDBStrategy extends Strategy {
         }
         */
 
+        // Sende Request
         const fetchResponse = await handler.fetch(request);
         console.log('###fetchResponse=', fetchResponse);
         if (fetchResponse) {
 
+          // Schreibe Response (Clone!) in Cache
           await handler.cachePut(request, fetchResponse.clone());
 
           // Stattdessen: Lege Response in IDB ab (statt in Cache).
@@ -120,8 +128,10 @@ registerRoute(new RegExp('https://api\\.agify\\.io.*'), new IDBStrategy());
 
 // APP SHELL UPDATE FLOW
 
+/*
 addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }
 });
+*/

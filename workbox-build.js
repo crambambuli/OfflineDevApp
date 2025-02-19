@@ -13,8 +13,8 @@ let workboxConfig = {
     '**/*-es5.*.js'
   ],
 
-  swSrc: 'src/service-worker.js',
-  swDest: 'dist/offline-dev-app/browser/sw.js',
+  swSrc: 'src/service-worker.ts',
+  swDest: 'dist/offline-dev-app/browser/sw.ts',
 
   // Angular takes care of cache busting for JS and CSS (in prod mode)
   dontCacheBustURLsMatching: new RegExp('.+.[a-f0-9]{20}.(?:js|css)'),
