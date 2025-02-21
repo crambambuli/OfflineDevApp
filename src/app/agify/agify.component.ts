@@ -6,8 +6,9 @@ import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatIcon } from '@angular/material/icon';
 import { MatIconButton } from '@angular/material/button';
 import { MatInput } from '@angular/material/input';
-import { Observable } from 'rxjs';
+import { catchError, EMPTY, Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
+import { AgifyResult } from '../../service-worker/agify-result';
 
 @Component({
   selector: 'app-agify',
@@ -41,13 +42,13 @@ export class AgifyComponent {
   }
 
   fetchAge(name: string) {
-    this.result$ = this.http.get<AgifyResult>(`https://api.agify.io?name=${name}`);
+    console.log('###fetchAge: name=', name);
+    this.result$ = this.http.get<AgifyResult>(`https://api.agify.io?name=${name}`).pipe(
+      catchError((e) => {
+        console.warn('###fetchAge: http.get fehlgeschlagen', e);
+        return EMPTY;
+      })
+    );
   }
-}
-
-interface AgifyResult {
-  count: number;
-  name: string;
-  age: number
 }
 

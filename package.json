@@ -7,8 +7,9 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
+    "copy-sw": "copy-folder src/service-worker dist/offline-dev-app/browser/service-worker",
     "build-sw": "node workbox-build.js && npx rollup -c --bundleConfigAsCjs",
-    "build-pwa": "ng build && npm run build-sw"
+    "build-pwa": "ng build && npm run copy-sw && npm run build-sw"
   },
   "private": true,
   "dependencies": {
@@ -47,6 +48,7 @@
     "@rollup/plugin-typescript": "^12.1.2",
     "@types/jasmine": "~5.1.0",
     "@types/wicg-file-system-access": "^2023.10.5",
+    "copy-folder-util": "^1.1.4",
     "jasmine-core": "^5.6.0",
     "karma": "~6.4.0",
     "karma-chrome-launcher": "~3.2.0",

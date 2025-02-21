@@ -2,7 +2,17 @@ import { createHandlerBoundToURL, precacheAndRoute } from 'workbox-precaching';
 import { googleFontsCache, imageCache } from 'workbox-recipes';
 import { NavigationRoute, registerRoute } from "workbox-routing";
 import { clientsClaim, setCacheNameDetails } from "workbox-core";
-import { CacheFirst, NetworkFirst, Strategy, StrategyHandler } from "workbox-strategies";
+import { IdbStrategy } from './service-worker/idb-strategy';
+import { PrecacheEntry } from 'workbox-precaching/src/_types';
+import { CacheStrategy } from './service-worker/cache-strategy';
+
+// Bereits in workbox-precaching unvollständig deklariert - hier ergänzt (um skipWaiting).
+declare global {
+  interface ServiceWorkerGlobalScope {
+    __WB_MANIFEST: Array<PrecacheEntry | string>;
+    skipWaiting(): void;
+  }
+}
 
 declare const self: ServiceWorkerGlobalScope;
 
@@ -49,89 +59,14 @@ const matchCallback = ({url, request, event}) => {
 registerRoute(matchCallback, new NetworkFirst());
 */
 
+registerRoute(new RegExp('https://api\\.genderize\\.io.*'), new CacheStrategy());
 
-class IDBStrategy extends Strategy {
-  _handle(request: Request, handler: StrategyHandler): Promise<Response | undefined> {
-
-    console.log('###IDBStrategy._handle: request=', request);
-
-    return new Promise(async (resolve, reject) => {
-      // Request in Cache?
-      const cacheMatchResponse = await handler.cacheMatch(request);
-      console.log('###cacheMatchResponse=', cacheMatchResponse);
-
-      // Stattdessen: Suche nach Response in IDB (statt in Cache).
-      // ...
-
-      if (cacheMatchResponse) {
-        // Eintrag für Request gefunden in Cache => Gib Response (Clone!) oder neue Response zurück.
-
-        // const newResponse = cacheMatchResponse.clone();
-
-        const responseBody = await cacheMatchResponse.text();
-        console.log('###responseBody=', responseBody);
-
-        const responseBodyJson = JSON.parse(responseBody);
-        responseBodyJson.age += 100;
-
-        const newResponse = new Response(JSON.stringify(responseBodyJson), {
-          headers: cacheMatchResponse.headers,
-          status: cacheMatchResponse.status,
-          statusText: cacheMatchResponse.statusText
-        });
-        console.log('###newResponse=', newResponse);
-
-        resolve(newResponse);
-      } else {
-        // Kein Eintrag in Cache => Sende Request und schreibe Response in Cache.
-
-        /*
-        const fetchAndCachePutResponse = await handler.fetchAndCachePut(request);
-        console.log('###fetchAndCachePutResponse=', fetchAndCachePutResponse);
-
-        if (fetchAndCachePutResponse) {
-          resolve(fetchAndCachePutResponse);
-        } else {
-          reject('Eintrag nicht im Cache und fetch fehlgeschlagen');
-        }
-        */
-
-        // Sende Request
-        const fetchResponse = await handler.fetch(request);
-        console.log('###fetchResponse=', fetchResponse);
-        if (fetchResponse) {
-
-          // Schreibe Response (Clone!) in Cache
-          await handler.cachePut(request, fetchResponse.clone());
-
-          // Stattdessen: Lege Response in IDB ab (statt in Cache).
-
-          resolve(fetchResponse);
-        } else {
-          reject('Eintrag nicht gecacht und fetch fehlgeschlagen');
-        }
-
-
-        // Stattdessen:
-        // - fetch
-        // - put in IDB (statt in Cache)
-
-
-      }
-    });
-
-  }
-}
-
-registerRoute(new RegExp('https://api\\.agify\\.io.*'), new IDBStrategy());
-
+registerRoute(new RegExp('https://api\\.agify\\.io.*'), new IdbStrategy());
 
 // APP SHELL UPDATE FLOW
 
-/*
 addEventListener('message', (event) => {
-  if (event.data && event.data.type === 'SKIP_WAITING') {
+  if (event?.data?.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }
 });
-*/
