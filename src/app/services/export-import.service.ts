@@ -51,7 +51,7 @@ export class ExportImportService {
       const appDataText = await file.text();
 
       const appDataJson = JSON.parse(appDataText);
-      console.log('###appDataJson=', appDataJson);
+      console.log('appDataJson=', appDataJson);
 
       this.handler = handler;
 

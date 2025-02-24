@@ -1,58 +1,43 @@
 import { Strategy, StrategyHandler } from 'workbox-strategies';
-import { AgifyResult } from './agify-result';
 import { AGIFY_STORE, dbPromise } from './idb-config';
+import { AgifyStruct } from './agify-struct';
 
 export class IdbStrategy extends Strategy {
+  async _handle(request: Request, handler: StrategyHandler): Promise<Response> {
 
-  _handle(request: Request, handler: StrategyHandler): Promise<Response | undefined> {
+    console.log('IdbStrategy._handle: request=', request);
 
-    console.log('###_handle: request=', request);
-    return new Promise(async (resolve, reject) => {
-      const db = await dbPromise;
-      const name = new URLSearchParams(new URL(request.url).search).get('name'); // Extrahiere name-Param aus URL
-      let agifyResult = await db.get(AGIFY_STORE, name);
+    const db = await dbPromise;
+    const name = new URLSearchParams(new URL(request.url).search).get('name'); // Extrahiere name-Param aus URL
+    const agifyFromIdb = await db.get(AGIFY_STORE, name);
 
-      if (agifyResult) {
-        // Response in idb gefunden.
-        console.log(`Eintrag für '${name}' in idb.`, agifyResult);
+    if (agifyFromIdb) {
+      // Response in idb gefunden.
+      console.log(`Eintrag für '${name}' in idb.`, agifyFromIdb);
 
-        const idbResponse = new Response(JSON.stringify(agifyResult), {
-          /*
-          // Headers may not have to be provided!
-          headers: {
-            'access-control-allow-credentials': 'true',
-            'access-control-allow-origin': '*',
-            'access-control-expose-headers': 'x-rate-limit-limit,x-rate-limit-remaining,x-rate-limit-reset',
-            'cache-control': 'max-age=0, private, must-revalidate',
-            'content-type': 'application/json; charset=utf-8'
-          },
-          */
-          status: 200,
-          statusText: 'OK'
-        });
-        console.log('idbResponse=', idbResponse);
+      const idbResponse = new Response(JSON.stringify(agifyFromIdb), { status: 200, statusText: 'OK' });
+      console.log('idbResponse=', idbResponse);
 
-        resolve(idbResponse);
-      } else {
-        console.log(`Eintrag für '${name}' nicht in idb.`);
+      return idbResponse;
+    } else {
+      // Keinen Eintrag in idb gefunden.
+      console.log(`Eintrag für '${name}' nicht in idb.`);
 
-        // Keinen Eintrag in idb gefunden.
-        try {
-          const fetchResponse = await handler.fetch(request);
-          console.log('fetchResponse=', fetchResponse);
+      try {
+        const fetchResponse = await handler.fetch(request);
+        console.log('fetchResponse=', fetchResponse);
 
-          if (fetchResponse.status === 200) {
-            agifyResult = <AgifyResult>JSON.parse(await fetchResponse.clone().text());
-            // Schreibe Response text in idb.
-            console.log('Schreibe response text in idb', agifyResult);
-            await db.add(AGIFY_STORE, agifyResult, name);
-          }
-          resolve(fetchResponse);
-        } catch (e: any) {
-          console.warn('###Eintrag nicht in idb und fetch fehlgeschlagen', e);
-          reject(e);
+        if (fetchResponse.status === 200) {
+          const agifyResponse = <AgifyStruct>JSON.parse(await fetchResponse.clone().text());
+          // Schreibe response struct in idb.
+          console.log('Schreibe response struct in idb', agifyResponse);
+          await db.add(AGIFY_STORE, { name: agifyResponse.name, age: agifyResponse.age }, name);
         }
+        return fetchResponse;
+      } catch (error) {
+        console.warn('Eintrag nicht in idb und fetch fehlgeschlagen', error);
+        return Promise.reject(error);
       }
-    });
+    }
   }
 }

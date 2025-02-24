@@ -1,18 +1,21 @@
 import { RouteHandlerCallbackOptions, RouteMatchCallbackOptions } from 'workbox-core';
-import { AgifyResult } from './agify-result';
+import { AgifyStruct } from './agify-struct';
 import { AGIFY_STORE, dbPromise } from './idb-config';
 
 export const setAgeRequestMatchCallback = ({ url, request }: RouteMatchCallbackOptions) => {
 
-  console.log('###setAgeRequestMatchCallback: url=', url, 'request=', request);
+  console.log('setAgeRequestMatchCallback: url=', url, 'request=', request);
 
   return url.host === 'api.agify.io' && url.pathname === '/set-age';
 };
 
 // POST-Request: Sende Post-Request
-export const setAgeRequestHandlerCallback = async ({ url, request }: RouteHandlerCallbackOptions) => {
+export const setAgeRequestHandlerCallback = async ({
+                                                     url,
+                                                     request
+                                                   }: RouteHandlerCallbackOptions): Promise<Response> => {
 
-  console.log('###setAgeRequestHandlerCallback: url=', url, 'request=', request);
+  console.log('setAgeRequestHandlerCallback: url=', url, 'request=', request);
 
   const requestBody = await request.clone().text();
 
@@ -20,29 +23,27 @@ export const setAgeRequestHandlerCallback = async ({ url, request }: RouteHandle
   // ...
 
   try {
-    console.log('###fetch', request);
+    console.log('fetch', request);
     const fetchResponse = await fetch(request);
-    console.log('###fetchResponse=', fetchResponse);
+    console.log('fetchResponse=', fetchResponse);
 
     if (fetchResponse.status === 200) {
       // Aktualisiere idb mit response body.
       const responseBody = await fetchResponse.clone().text();
-      const agifyResult = <AgifyResult>JSON.parse(responseBody);
-      await (await dbPromise).put(AGIFY_STORE, agifyResult, agifyResult.name);
+      const agifyStruct = <AgifyStruct>JSON.parse(responseBody);
+      await (await dbPromise).put(AGIFY_STORE, agifyStruct, agifyStruct.name);
     }
 
     return fetchResponse;
   } catch (error) { // Offline
     console.warn('fetch error (offline?):', error);
-    // return Promise.reject(`###fetch fehlgeschlagen: ${error}`);
 
     // Request konnte nicht gesendet werden (offline) => enqueue, um später erneut zu senden.
     // ...
 
     // Aktualisiere idb dennoch (implizit: response body gleich request body).
-    const agifyResult = <AgifyResult>JSON.parse(requestBody);
-    //await (await dbPromise).put(AGIFY_STORE, agifyResult, agifyResult.name);
-    await (await dbPromise).put(AGIFY_STORE, agifyResult);
+    const agifyStruct = <AgifyStruct>JSON.parse(requestBody);
+    await (await dbPromise).put(AGIFY_STORE, agifyStruct, agifyStruct.name);
 
     // Sende 200-Response zurück an Client.
     return new Response(requestBody, {

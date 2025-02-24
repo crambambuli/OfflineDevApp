@@ -1,4 +1,4 @@
-export interface AgifyResult {
+export interface AgifyStruct {
   name: string;
   age: number
 }

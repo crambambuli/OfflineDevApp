@@ -1,5 +1,5 @@
 import { DBSchema, IDBPDatabase, openDB } from 'idb';
-import { AgifyResult } from './agify-result';
+import { AgifyStruct } from './agify-struct';
 
 const DB_NAME = 'request-db';
 export const AGIFY_STORE = 'agify-store';
@@ -7,7 +7,7 @@ export const AGIFY_STORE = 'agify-store';
 interface RequestDB extends DBSchema {
   [AGIFY_STORE]: {
     key: string;
-    value: AgifyResult;
+    value: AgifyStruct;
   }
 }
 

@@ -3,12 +3,12 @@ import { Strategy, StrategyHandler } from 'workbox-strategies';
 export class CacheStrategy extends Strategy {
   _handle(request: Request, handler: StrategyHandler): Promise<Response | undefined> {
 
-    console.log('###CacheStrategy._handle: request=', request);
+    console.log('CacheStrategy._handle: request=', request);
 
     return new Promise(async (resolve, reject) => {
       // Request in Cache?
       const cacheMatchResponse = await handler.cacheMatch(request);
-      console.log('###cacheMatchResponse=', cacheMatchResponse);
+      console.log('cacheMatchResponse=', cacheMatchResponse);
 
       if (cacheMatchResponse) {
         // Eintrag für Request gefunden in Cache => Gib Response (Clone!) oder neue Response zurück.
@@ -16,7 +16,7 @@ export class CacheStrategy extends Strategy {
         // const newResponse = cacheMatchResponse.clone();
 
         const responseBody = await cacheMatchResponse.text();
-        console.log('###responseBody=', responseBody);
+        console.log('responseBody=', responseBody);
 
         const responseBodyJson = JSON.parse(responseBody);
         responseBodyJson.age += 100;
@@ -26,16 +26,16 @@ export class CacheStrategy extends Strategy {
           status: cacheMatchResponse.status,
           statusText: cacheMatchResponse.statusText
         });
-        console.log('###newResponse=', newResponse);
+        console.log('newResponse=', newResponse);
 
         resolve(newResponse);
       } else {
         // Kein Eintrag in Cache => Sende Request und schreibe Response in Cache.
-        console.log('###Eintrag nicht in Cache');
+        console.log('Eintrag nicht in Cache');
 
         // Sende Request und schreibe Response in Cache (in einem Schritt).
         const fetchAndCachePutResponse = await handler.fetchAndCachePut(request);
-        console.log('###fetchAndCachePutResponse=', fetchAndCachePutResponse);
+        console.log('fetchAndCachePutResponse=', fetchAndCachePutResponse);
         if (fetchAndCachePutResponse) {
           resolve(fetchAndCachePutResponse);
         } else {
@@ -45,7 +45,7 @@ export class CacheStrategy extends Strategy {
         /*
         // Sende Request
         const fetchResponse = await handler.fetch(request);
-        console.log('###fetchResponse=', fetchResponse);
+        console.log('fetchResponse=', fetchResponse);
         if (fetchResponse) {
           // Schreibe Response (Clone) in Cache. Kann theoretisch fehlschlagen (egal).
           await handler.cachePut(request, fetchResponse.clone());

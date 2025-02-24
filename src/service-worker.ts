@@ -6,8 +6,6 @@ import { IdbStrategy } from './service-worker/idb-strategy';
 import { PrecacheEntry } from 'workbox-precaching/src/_types';
 import { CacheStrategy } from './service-worker/cache-strategy';
 import { setAgeRequestHandlerCallback, setAgeRequestMatchCallback } from './service-worker/set-age-request-callbacks';
-import { DBSchema, IDBPDatabase, openDB } from 'idb';
-import { AgifyResult } from './service-worker/agify-result';
 
 // Bereits in workbox-precaching unvollständig deklariert - hier ergänzt (um skipWaiting).
 declare global {
