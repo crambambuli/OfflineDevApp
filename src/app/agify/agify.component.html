@@ -17,8 +17,22 @@
       <mat-icon>search</mat-icon>
     </button>
 
-    @if (result$ | async; as result) {
-      <div>Alter: {{ result.age }}</div>
+    <mat-form-field>
+      <input
+        matInput
+        type="number"
+        [(ngModel)]="age"
+        [disabled]="!name"
+        (keydown.enter)="age && setAge(name, age)">
+      <mat-label>Alter</mat-label>
+    </mat-form-field>
+
+    <button mat-icon-button [disabled]="!name || !age" (click)="setAge(name, age)">
+      <mat-icon>send</mat-icon>
+    </button>
+
+    @if (age) {
+      <div>Alter: {{ age }}</div>
     }
   </mat-card-content>
 </mat-card>

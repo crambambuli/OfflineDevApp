@@ -1,44 +1,38 @@
 import { Strategy, StrategyHandler } from 'workbox-strategies';
-
-import { DBSchema, IDBPDatabase, openDB } from 'idb';
 import { AgifyResult } from './agify-result';
-
-const DB_NAME = 'request-db';
-const AGIFY_STORE = 'agify-store';
-
-interface RequestDB extends DBSchema {
-  [AGIFY_STORE]: {
-    key: string;
-    value: AgifyResult;
-  }
-}
+import { AGIFY_STORE, dbPromise } from './idb-config';
 
 export class IdbStrategy extends Strategy {
 
-  private dbPromise: Promise<IDBPDatabase<RequestDB>>;
-
-  constructor() {
-    super();
-
-    this.dbPromise = openDB<RequestDB>(DB_NAME, 1, {
-      upgrade(db) {
-        db.createObjectStore(AGIFY_STORE, {
-          keyPath: 'name' // wtf?
-        });
-      }
-    });
-  }
-
   _handle(request: Request, handler: StrategyHandler): Promise<Response | undefined> {
+
+    console.log('###_handle: request=', request);
     return new Promise(async (resolve, reject) => {
-      const db = await this.dbPromise;
+      const db = await dbPromise;
       const name = new URLSearchParams(new URL(request.url).search).get('name'); // Extrahiere name-Param aus URL
       let agifyResult = await db.get(AGIFY_STORE, name);
 
       if (agifyResult) {
         // Response in idb gefunden.
         console.log(`Eintrag für '${name}' in idb.`, agifyResult);
-        resolve(new Response(JSON.stringify(agifyResult), { status: 200, statusText: 'OK' }));
+
+        const idbResponse = new Response(JSON.stringify(agifyResult), {
+          /*
+          // Headers may not have to be provided!
+          headers: {
+            'access-control-allow-credentials': 'true',
+            'access-control-allow-origin': '*',
+            'access-control-expose-headers': 'x-rate-limit-limit,x-rate-limit-remaining,x-rate-limit-reset',
+            'cache-control': 'max-age=0, private, must-revalidate',
+            'content-type': 'application/json; charset=utf-8'
+          },
+          */
+          status: 200,
+          statusText: 'OK'
+        });
+        console.log('idbResponse=', idbResponse);
+
+        resolve(idbResponse);
       } else {
         console.log(`Eintrag für '${name}' nicht in idb.`);
 
@@ -49,8 +43,8 @@ export class IdbStrategy extends Strategy {
 
           if (fetchResponse.status === 200) {
             agifyResult = <AgifyResult>JSON.parse(await fetchResponse.clone().text());
-            // Schreibe Response body in idb.
-            console.log('Schreibe response body in idb', agifyResult);
+            // Schreibe Response text in idb.
+            console.log('Schreibe response text in idb', agifyResult);
             await db.add(AGIFY_STORE, agifyResult, name);
           }
           resolve(fetchResponse);

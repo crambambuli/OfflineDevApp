@@ -5,11 +5,15 @@ import { clientsClaim, setCacheNameDetails } from "workbox-core";
 import { IdbStrategy } from './service-worker/idb-strategy';
 import { PrecacheEntry } from 'workbox-precaching/src/_types';
 import { CacheStrategy } from './service-worker/cache-strategy';
+import { setAgeRequestHandlerCallback, setAgeRequestMatchCallback } from './service-worker/set-age-request-callbacks';
+import { DBSchema, IDBPDatabase, openDB } from 'idb';
+import { AgifyResult } from './service-worker/agify-result';
 
 // Bereits in workbox-precaching unvollständig deklariert - hier ergänzt (um skipWaiting).
 declare global {
   interface ServiceWorkerGlobalScope {
     __WB_MANIFEST: Array<PrecacheEntry | string>;
+
     skipWaiting(): void;
   }
 }
@@ -51,17 +55,13 @@ imageCache({ cacheName: 'wb7-content-images', maxEntries: 10 });
 
 // RUNTIME CACHING
 
-/*
-const matchCallback = ({url, request, event}) => {
-  console.log('###matchCallback:', url, request, event);
-  return false;
-}
-registerRoute(matchCallback, new NetworkFirst());
-*/
+
+registerRoute(new RegExp('https://api\\.agify\\.io.*'), new IdbStrategy());
+
+registerRoute(setAgeRequestMatchCallback, setAgeRequestHandlerCallback, 'POST');
 
 registerRoute(new RegExp('https://api\\.genderize\\.io.*'), new CacheStrategy());
 
-registerRoute(new RegExp('https://api\\.agify\\.io.*'), new IdbStrategy());
 
 // APP SHELL UPDATE FLOW
 
