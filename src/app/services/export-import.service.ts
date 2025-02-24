@@ -1,5 +1,7 @@
 import { Injectable } from '@angular/core';
 import { IDBPDatabase, openDB } from 'idb';
+import { AGIFY_STORE, dbPromise } from '../../service-worker/idb-config';
+import { AgifyStruct } from '../../service-worker/agify-struct';
 
 @Injectable({
   providedIn: 'root'
@@ -50,12 +52,24 @@ export class ExportImportService {
       const file = await handler.getFile();
       const appDataText = await file.text();
 
-      const appDataJson = JSON.parse(appDataText);
-      console.log('appDataJson=', appDataJson);
+      const agifyStructs = <AgifyStruct[]>JSON.parse(appDataText);
+
+      console.log('Importiere idb-Anwendungsdaten/JSON', agifyStructs);
+
+      const db = await dbPromise;
+      await db.clear(AGIFY_STORE);
+
+      const tx = db.transaction(AGIFY_STORE, 'readwrite')
+      const store = tx.store;
+
+      for (const agifyStruct of agifyStructs) {
+        await store.add(agifyStruct, agifyStruct.name);
+      }
+
+      tx.done;
 
       this.handler = handler;
 
-      // this.editor.setContent(content);
       await this.db.put('settings', handler, 'handler');
 
     } catch (e) {
@@ -75,10 +89,17 @@ export class ExportImportService {
       try {
         const writable = await handler.createWritable();
 
-        const appDataJson = {
-          'application-data': 'Crambambuli'
-        };
-        await writable.write(JSON.stringify(appDataJson));
+        const db = await dbPromise;
+        const tx = db.transaction(AGIFY_STORE, 'readonly')
+        const store = tx.store;
+
+        const agifyStructs = await store.getAll();
+
+        console.log('Exportiere idb-Anwendungsdaten/JSON', agifyStructs);
+
+        await writable.write(JSON.stringify(agifyStructs));
+
+        tx.done;
 
         await writable.close();
       } catch (e) {
