@@ -6,6 +6,7 @@ import { IdbStrategy } from './service-worker/idb-strategy';
 import { PrecacheEntry } from 'workbox-precaching/src/_types';
 import { CacheStrategy } from './service-worker/cache-strategy';
 import { setAgeRequestHandlerCallback, setAgeRequestMatchCallback } from './service-worker/set-age-request-callbacks';
+import { AGE_API_URL } from './service-worker/age-struct';
 
 // Bereits in workbox-precaching unvollständig deklariert - hier ergänzt (um skipWaiting).
 declare global {
@@ -53,10 +54,12 @@ imageCache({ cacheName: 'wb7-content-images', maxEntries: 10 });
 
 // RUNTIME CACHING
 
-
-registerRoute(new RegExp('https://api\\.agify\\.io.*'), new IdbStrategy());
-
+//
 registerRoute(setAgeRequestMatchCallback, setAgeRequestHandlerCallback, 'POST');
+
+// GET-Request
+registerRoute(new RegExp(`${AGE_API_URL}.*`), new IdbStrategy());
+
 
 registerRoute(new RegExp('https://api\\.genderize\\.io.*'), new CacheStrategy());
 

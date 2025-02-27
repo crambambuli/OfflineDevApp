@@ -1,21 +1,22 @@
 import { Strategy, StrategyHandler } from 'workbox-strategies';
-import { AGIFY_STORE, dbPromise } from './idb-config';
-import { AgifyStruct } from './agify-struct';
+import { AGE_STORE, dbPromise } from './idb-config';
+import { AgeStruct } from './age-struct';
 
 export class IdbStrategy extends Strategy {
   async _handle(request: Request, handler: StrategyHandler): Promise<Response> {
 
     console.log('IdbStrategy._handle: request=', request);
 
-    const db = await dbPromise;
-    const name = new URLSearchParams(new URL(request.url).search).get('name'); // Extrahiere name-Param aus URL
-    const agifyFromIdb = await db.get(AGIFY_STORE, name);
+    const url = request.url;
+    const pos = url.lastIndexOf('/');
+    const name = url.substring(pos + 1); // "name" REST path param
+    const ageStructFromIdb = await (await dbPromise).get(AGE_STORE, name);
 
-    if (agifyFromIdb) {
+    if (ageStructFromIdb) {
       // Response in idb gefunden.
-      console.log(`Eintrag für '${name}' in idb.`, agifyFromIdb);
+      console.log(`Eintrag für '${name}' in idb.`, ageStructFromIdb);
 
-      const idbResponse = new Response(JSON.stringify(agifyFromIdb), { status: 200, statusText: 'OK' });
+      const idbResponse = new Response(JSON.stringify(ageStructFromIdb), { status: 200, statusText: 'OK' });
       console.log('idbResponse=', idbResponse);
 
       return idbResponse;
@@ -28,10 +29,10 @@ export class IdbStrategy extends Strategy {
         console.log('fetchResponse=', fetchResponse);
 
         if (fetchResponse.status === 200) {
-          const agifyResponse = <AgifyStruct>JSON.parse(await fetchResponse.clone().text());
+          const ageStructResponse = <AgeStruct>JSON.parse(await fetchResponse.clone().text());
           // Schreibe response struct in idb.
-          console.log('Schreibe response struct in idb', agifyResponse);
-          await db.add(AGIFY_STORE, { name: agifyResponse.name, age: agifyResponse.age }, name);
+          console.log('Schreibe response struct in idb', ageStructResponse);
+          await (await dbPromise).add(AGE_STORE, { name: ageStructResponse.name, age: ageStructResponse.age });
         }
         return fetchResponse;
       } catch (error) {

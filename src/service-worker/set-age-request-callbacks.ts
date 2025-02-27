@@ -1,12 +1,12 @@
 import { RouteHandlerCallbackOptions, RouteMatchCallbackOptions } from 'workbox-core';
-import { AgifyStruct } from './agify-struct';
-import { AGIFY_STORE, dbPromise } from './idb-config';
+import { AGE_API_URL, AgeStruct } from './age-struct';
+import { AGE_STORE, dbPromise } from './idb-config';
 
 export const setAgeRequestMatchCallback = ({ url, request }: RouteMatchCallbackOptions) => {
 
   console.log('setAgeRequestMatchCallback: url=', url, 'request=', request);
 
-  return url.host === 'api.agify.io' && url.pathname === '/set-age';
+  return url.href === AGE_API_URL;
 };
 
 // POST-Request: Sende Post-Request
@@ -18,7 +18,6 @@ export const setAgeRequestHandlerCallback = async ({
   console.log('setAgeRequestHandlerCallback: url=', url, 'request=', request);
 
   const requestBody = await request.clone().text();
-
   // Gibt es bereits eine request queue? Dann enqueue dort. Sonst fetch.
   // ...
 
@@ -27,11 +26,11 @@ export const setAgeRequestHandlerCallback = async ({
     const fetchResponse = await fetch(request);
     console.log('fetchResponse=', fetchResponse);
 
-    if (fetchResponse.status === 200) {
+    if (fetchResponse.status === 201) { // "Created"
       // Aktualisiere idb mit response body.
       const responseBody = await fetchResponse.clone().text();
-      const agifyStruct = <AgifyStruct>JSON.parse(responseBody);
-      await (await dbPromise).put(AGIFY_STORE, agifyStruct, agifyStruct.name);
+      const agifyStruct = <AgeStruct>JSON.parse(responseBody);
+      await (await dbPromise).put(AGE_STORE, agifyStruct);
     }
 
     return fetchResponse;
@@ -42,8 +41,8 @@ export const setAgeRequestHandlerCallback = async ({
     // ...
 
     // Aktualisiere idb dennoch (implizit: response body gleich request body).
-    const agifyStruct = <AgifyStruct>JSON.parse(requestBody);
-    await (await dbPromise).put(AGIFY_STORE, agifyStruct, agifyStruct.name);
+    const agifyStruct = <AgeStruct>JSON.parse(requestBody);
+    await (await dbPromise).put(AGE_STORE, agifyStruct);
 
     // Sende 200-Response zurück an Client.
     return new Response(requestBody, {

@@ -7,7 +7,7 @@ import { MatIconButton } from '@angular/material/button';
 import { MatInput } from '@angular/material/input';
 import { catchError } from 'rxjs';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { AgifyStruct } from '../../service-worker/agify-struct';
+import { AGE_API_URL, AgeStruct } from '../../service-worker/age-struct';
 
 const JSON_OPTIONS = {
   headers: new HttpHeaders({
@@ -16,7 +16,7 @@ const JSON_OPTIONS = {
 };
 
 @Component({
-  selector: 'app-agify',
+  selector: 'app-age',
   imports: [
     FormsModule,
     MatCard,
@@ -47,14 +47,14 @@ export class AgifyComponent {
 
   fetchAge(name: string) {
     console.log('fetchAge: name=', name);
-    this.http.get<AgifyStruct>(`https://api.agify.io?name=${name}`).pipe(
+    this.http.get<AgeStruct>(`${AGE_API_URL}/${name}`, JSON_OPTIONS).pipe(
       catchError((error) => {
         console.warn('fetchAge: http.get fehlgeschlagen', error);
         throw error;
       })
-    ).subscribe((agifyStruct) => {
-      console.log('fetchAge: agifyStruct', agifyStruct);
-      this.age = agifyStruct.age;
+    ).subscribe((ageStruct) => {
+      console.log('fetchAge: ageStruct', ageStruct);
+      this.age = ageStruct.age;
     });
   }
 
@@ -62,16 +62,15 @@ export class AgifyComponent {
     console.log('setAge: name=', name, 'age=', age);
 
     if (name && age) {
-      const url = 'https://api.agify.io/set-age';
-      const body = JSON.stringify(<AgifyStruct>{ name, age });
-      this.http.post<AgifyStruct>(url, body, JSON_OPTIONS).pipe(
+      const body = JSON.stringify(<AgeStruct>{ name, age });
+      this.http.post<AgeStruct>(AGE_API_URL, body, JSON_OPTIONS).pipe(
         catchError((error) => {
           console.warn('setAge http.post fehlgeschlagen', error);
           throw error;
         })
-      ).subscribe((agifyStruct) => {
-        console.log('setAge: agifyStruct=', agifyStruct);
-        this.age = agifyStruct.age;
+      ).subscribe((ageStruct) => {
+        console.log('setAge: ageStruct=', ageStruct);
+        this.age = ageStruct.age;
       });
     }
   }

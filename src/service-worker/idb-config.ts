@@ -1,20 +1,20 @@
 import { DBSchema, IDBPDatabase, openDB } from 'idb';
-import { AgifyStruct } from './agify-struct';
+import { AgeStruct } from './age-struct';
 
-const DB_NAME = 'request-db';
-export const AGIFY_STORE = 'agify-store';
+export const DB_NAME = 'request-db';
+export const AGE_STORE = 'age-store';
 
-interface RequestDB extends DBSchema {
-  [AGIFY_STORE]: {
+export interface RequestDB extends DBSchema {
+  [AGE_STORE]: {
     key: string;
-    value: AgifyStruct;
+    value: AgeStruct;
   }
 }
 
 export const dbPromise: Promise<IDBPDatabase<RequestDB>> = openDB<RequestDB>(DB_NAME, 1, {
   upgrade(db) {
-    db.createObjectStore(AGIFY_STORE, {
-      keyPath: 'name' // wtf?
+    db.createObjectStore(AGE_STORE, {
+      keyPath: 'name'
     });
   }
 });
