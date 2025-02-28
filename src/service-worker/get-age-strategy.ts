@@ -2,7 +2,7 @@ import { Strategy, StrategyHandler } from 'workbox-strategies';
 import { AGE_STORE, dbPromise } from './idb-config';
 import { AgeStruct } from './age-struct';
 
-export class IdbStrategy extends Strategy {
+export class GetAgeStrategy extends Strategy {
   async _handle(request: Request, handler: StrategyHandler): Promise<Response> {
 
     console.log('IdbStrategy._handle: request=', request);
@@ -10,13 +10,14 @@ export class IdbStrategy extends Strategy {
     const url = request.url;
     const pos = url.lastIndexOf('/');
     const name = url.substring(pos + 1); // "name" REST path param
-    const ageStructFromIdb = await (await dbPromise).get(AGE_STORE, name);
+    const db = await dbPromise;
+    const ageEntryFromIdb = await db.get(AGE_STORE, name);
 
-    if (ageStructFromIdb) {
+    if (ageEntryFromIdb) {
       // Response in idb gefunden.
-      console.log(`Eintrag für '${name}' in idb.`, ageStructFromIdb);
+      console.log(`Eintrag für '${name}' in idb.`, ageEntryFromIdb);
 
-      const idbResponse = new Response(JSON.stringify(ageStructFromIdb), { status: 200, statusText: 'OK' });
+      const idbResponse = new Response(JSON.stringify(ageEntryFromIdb), { status: 200, statusText: 'OK' });
       console.log('idbResponse=', idbResponse);
 
       return idbResponse;
@@ -29,10 +30,10 @@ export class IdbStrategy extends Strategy {
         console.log('fetchResponse=', fetchResponse);
 
         if (fetchResponse.status === 200) {
-          const ageStructResponse = <AgeStruct>JSON.parse(await fetchResponse.clone().text());
+          const ageEntryFromFetch = <AgeStruct>JSON.parse(await fetchResponse.clone().text());
           // Schreibe response struct in idb.
-          console.log('Schreibe response struct in idb', ageStructResponse);
-          await (await dbPromise).add(AGE_STORE, { name: ageStructResponse.name, age: ageStructResponse.age });
+          console.log('Schreibe response struct in idb', ageEntryFromFetch);
+          await db.add(AGE_STORE, { name: ageEntryFromFetch.name, age: ageEntryFromFetch.age });
         }
         return fetchResponse;
       } catch (error) {

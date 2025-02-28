@@ -2,10 +2,10 @@ import { createHandlerBoundToURL, precacheAndRoute } from 'workbox-precaching';
 import { googleFontsCache, imageCache } from 'workbox-recipes';
 import { NavigationRoute, registerRoute } from "workbox-routing";
 import { clientsClaim, setCacheNameDetails } from "workbox-core";
-import { IdbStrategy } from './service-worker/idb-strategy';
+import { GetAgeStrategy } from './service-worker/get-age-strategy';
 import { PrecacheEntry } from 'workbox-precaching/src/_types';
 import { CacheStrategy } from './service-worker/cache-strategy';
-import { setAgeRequestHandlerCallback, setAgeRequestMatchCallback } from './service-worker/set-age-request-callbacks';
+import { agePostRequestHandlerCallback, agePostRequestMatchCallback } from './service-worker/set-age-request-callbacks';
 import { AGE_API_URL } from './service-worker/age-struct';
 
 // Bereits in workbox-precaching unvollständig deklariert - hier ergänzt (um skipWaiting).
@@ -54,13 +54,11 @@ imageCache({ cacheName: 'wb7-content-images', maxEntries: 10 });
 
 // RUNTIME CACHING
 
-//
-registerRoute(setAgeRequestMatchCallback, setAgeRequestHandlerCallback, 'POST');
+registerRoute(new RegExp(`${AGE_API_URL}.*`), new GetAgeStrategy(), 'GET');
 
-// GET-Request
-registerRoute(new RegExp(`${AGE_API_URL}.*`), new IdbStrategy());
+registerRoute(agePostRequestMatchCallback, agePostRequestHandlerCallback, 'POST');
 
-
+// GET-Request by default
 registerRoute(new RegExp('https://api\\.genderize\\.io.*'), new CacheStrategy());
 
 
