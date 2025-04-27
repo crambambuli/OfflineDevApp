@@ -1,6 +1,6 @@
 const {injectManifest} = require('workbox-build');
 
-let workboxConfig = {
+const workboxConfig = {
   globDirectory: 'dist/offline-dev-app/browser',
   globPatterns: [
     'index.html',

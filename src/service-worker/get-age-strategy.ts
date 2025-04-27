@@ -1,11 +1,18 @@
 import { Strategy, StrategyHandler } from 'workbox-strategies';
 import { AGE_STORE, dbPromise } from './idb-config';
 import { AgeStruct } from './age-struct';
+import { WorkboxPlugin } from 'workbox-core/types';
+import { SW_VERSION } from './sw-version';
 
 export class GetAgeStrategy extends Strategy {
+
+  constructor(plugins?: WorkboxPlugin[]) {
+    super({ plugins });
+  }
+
   async _handle(request: Request, handler: StrategyHandler): Promise<Response> {
 
-    console.log('IdbStrategy._handle: request=', request);
+    console.log('async IdbStrategy._handle: request=', request);
 
     const url = request.url;
     const pos = url.lastIndexOf('/');
@@ -14,16 +21,16 @@ export class GetAgeStrategy extends Strategy {
     const ageEntryFromIdb = await db.get(AGE_STORE, name);
 
     if (ageEntryFromIdb) {
-      // Response in idb gefunden.
-      console.log(`Eintrag für '${name}' in idb.`, ageEntryFromIdb);
+      // Passenden Eintrag in idb gefunden.
+      console.log(`[${SW_VERSION}] Eintrag für «${name}» in idb.`, ageEntryFromIdb);
 
       const idbResponse = new Response(JSON.stringify(ageEntryFromIdb), { status: 200, statusText: 'OK' });
       console.log('idbResponse=', idbResponse);
 
       return idbResponse;
     } else {
-      // Keinen Eintrag in idb gefunden.
-      console.log(`Eintrag für '${name}' nicht in idb.`);
+      // Passenden Eintrag _nicht_ in idb gefunden.
+      console.log(`[${SW_VERSION}] Eintrag für «${name}» nicht in idb.`);
 
       try {
         const fetchResponse = await handler.fetch(request);

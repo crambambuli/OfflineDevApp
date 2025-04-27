@@ -1,7 +1,9 @@
 import { RouteHandlerCallbackOptions, RouteMatchCallbackOptions } from 'workbox-core';
 import { AGE_API_URL, AgeStruct } from './age-struct';
 import { AGE_STORE, dbPromise } from './idb-config';
-import { requestQueue } from './age-request-queue';
+import { Queue } from 'workbox-background-sync';
+
+const requestQueue = new Queue('agePostRequestQueue');
 
 export const agePostRequestMatchCallback = ({ url, request }: RouteMatchCallbackOptions) => {
 
@@ -15,19 +17,16 @@ export const agePostRequestHandlerCallback = async ({ url, request }: RouteHandl
 
   console.log('agePostRequestHandlerCallback: url=', url, 'request=', request);
 
-  // Gibt es bereits Einträge in Request Queue? => Versuche, RQ abzuarbeiten.
-  if (!requestQueue.empty()) {
-    await requestQueue.processRequests(); // Try to send (fetch) all previously unsent requests
-  }
-
-  // RQ _nicht_ leer => Enqueue in RQ (ohne fetch), sonst sende fetch-Request.
-  if (!requestQueue.empty()) { // Still offline
-    console.log('[rq not empty] enqueue request=', request);
-    requestQueue.enqueue(request);
+  if (await requestQueue.size() > 0) {
+    // Wenn Request Queue nicht leer, enqueue den Request sofort (ohne fetch), um die Reihenfolge zu wahren.
+    console.log('[request queue not empty] enqueue request=', request);
 
     const requestBody = await request.clone().text();
     await updateIdb(requestBody);
 
+    await requestQueue.pushRequest({ request });
+
+    // Sende 200-Response zurück an Client.
     return new Response(requestBody, {
       status: 200,
       statusText: 'OK'
@@ -52,11 +51,12 @@ export const agePostRequestHandlerCallback = async ({ url, request }: RouteHandl
 
       // Request konnte nicht gesendet werden (offline) => enqueue, um später erneut zu senden.
       console.log('[error caught] enqueue request=', request);
-      requestQueue.enqueue(request);
 
       // Aktualisiere idb dennoch (implizit: response body gleich request body).
       const requestBody = await request.clone().text();
       await updateIdb(requestBody);
+
+      await requestQueue.pushRequest({ request });
 
       // Sende 200-Response zurück an Client.
       return new Response(requestBody, {

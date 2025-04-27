@@ -24,8 +24,8 @@ app.options('*', cors(corsOptions)); // Enable preflight requests for all routes
 // In-memory storage for ages
 const ages = {
   Alex: 22,
-  Beppo: 33,
-  Lars: 44,
+  Anna: 33,
+  Beppo: 44,
   Benno: 55,
   Willy: 66
 };
