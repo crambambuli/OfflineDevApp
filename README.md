@@ -9,11 +9,9 @@ Capabilities/Use Case:
 - Import application data etc. from file
 - Run/develop application in offline-mode
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.0.3.
+## Development server without Service Worker support
 
-## Development server
-
-To start a local development server, run:
+To start a local development server without Service Worker support, run:
 
 ```bash
 ng serve
@@ -21,56 +19,57 @@ ng serve
 
 Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
 
+## Run as PWA
+
+Building the distribution entails an Angular build (ng build) together with a Workbox build
+to initialize the Service Worker and package the application.
+The artifacts are in the `dist/browser/` directory.
+
 ```bash
 npm run build-pwa
 ```
 
+Start local HTTP server:
 ```bash
-http-server dist/offline-dev-app/browser  -c-1
+http-server dist/offline-dev-app/browser -c-1
+```
+Once the server is running, open your browser and navigate to `http://localhost:8080/`.
+
+On rebuilding the distribution, the server updates automatically. The application must be reloaded manually.
+
+Start local Node Express demo server for Agify REST API calls (offering a POST request beside a GET request):
+```bash
+node api-server/server
 ```
 
-## Code scaffolding
+## Demo Application
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+### Genderize
+Demonstrates usage of the Service Worker Cache (with a cache-first strategy).
 
-```bash
-ng generate component component-name
-```
+GET request is intercepted by the service worker.
+If a matching response is found in the service worker cache, this response is returned.
+Otherwise, the Genderize.io REST API is called, the response is put in the cache and returned to the caller.
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+### Agify
+Demonstrates usage of IndexedDB.
 
-```bash
-ng generate --help
-```
+Service worker intercepts both GET and POST requests.
+Contents of response is parsed and put as object into IndexedDB. For POST requests, object in IndexedDB is updated.
 
-## Building
+### Nationalize
+Demonstrates an ordinary HTTP request bypassing the service worker.
 
-To build the project run:
+### Home
+Demonstrates usage of the file system access API to export and import an IndexedDB table to and from a JSON file.
 
-```bash
-ng build
-```
+### Offline Mode
+Stop the http-server process or put the browser tab in offline mode. Then reload the page.
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+### Application Update Demo
+Update the application, e.g. by incrementing the version number in sw-version.ts. Build the distribution (see above). Reload the page.
+A dialog saying "A new version of the website is available" appears at the bottom. Click Reload page.
+Try also with more than one open tab.
+The version number is logged in the console on fetch requests.
 
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+Update and build the application. Close all application tabs. Reopen the app in a new tab.
