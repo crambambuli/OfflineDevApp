@@ -73,3 +73,9 @@ Try also with more than one open tab.
 The version number is logged in the console on fetch requests.
 
 Update and build the application. Close all application tabs. Reopen the app in a new tab.
+
+### Headless Mode (Chrome)
+Click on "In App öffnen" in the Chrome address bar.
+
+### Environment
+Tested under NPM version 11.2.0 and Node version v22.11.0.
